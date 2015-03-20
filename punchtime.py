@@ -60,7 +60,8 @@ if __name__ == '__main__':
 	posix.kill(daemon_pid,signal.SIGUSR2)
 	
 	# Wait for acknowledgment
-	print acknowledged
+	while not acknowledged:
+		signal.pause()
 	
 	clear_flag_file(flag_file)
 	
