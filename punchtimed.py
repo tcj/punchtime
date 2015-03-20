@@ -21,7 +21,8 @@ def ingest_timepunch():
 		print "no punches found."
 	else:
 		for punch in punches:
-			print 'calling PID = %s' % punch.split('.')[1]
+			client_pid = int(punch.split('.')[1].strip())
+			print 'client PID = %s' % client_pid
 			try: 
 				punch_file = file(punch,'r')
 			except:
@@ -30,6 +31,10 @@ def ingest_timepunch():
 				uid, user = punch_file.readline().split(' ')
 				print "punch in user #%s, %s" % (uid, user)
 				punch_file.close()
+				try:
+					os.kill(int(client_pid), signal.SIGUSR1)
+				except:
+					print "pid %d not found" % client_pid
 
 
 def usr2_received(signal, frame):

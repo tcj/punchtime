@@ -6,6 +6,9 @@
 import os
 import posix
 import signal
+import time
+
+acknowledged = False
 
 def write_flag_file(flag_file):
 	uid = posix.getuid()
@@ -36,15 +39,31 @@ def get_daemon_pid():
 	pidfile.close()
 	return pid	
 
+def handle_signal(num, thread):
+	global acknowledged
+	if num == signal.SIGUSR1:
+		print "acknowledgment received."
+		acknowledged = True
+
 	
 if __name__ == '__main__':
 	mypid = posix.getpid()	
-	flag_file = '/tmp/punch.%s' % str(mypid)
-	
 	daemon_pid = get_daemon_pid()
-	print get_daemon_pid()
+	print "my pid = %d, daemon_pid = %d" % (mypid, daemon_pid)
+
+	signal.signal(signal.SIGUSR1, handle_signal)
+
+	flag_file = '/tmp/punch.%s' % str(mypid)	
 	write_flag_file(flag_file)
+
+	# Signal daemon that our punch is ready
 	posix.kill(daemon_pid,signal.SIGUSR2)
-	# TODO: clear flag file even if signal fails
+	
+	# Wait for acknowledgment
+	print acknowledged
+	
 	clear_flag_file(flag_file)
+	
+	# TODO: clear flag file even if signal fails?
+
 
