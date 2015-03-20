@@ -17,33 +17,38 @@ def ingest_timepunch():
 	# stat the UID from the file
 	# stat other things as well (time)
 	punches = glob.glob('/tmp/punch.*')
-	if not punches:
-		print "no punches found."
-	else:
-		for punch in punches:
-			client_pid = int(punch.split('.')[1].strip())
-			print 'client PID = %s' % client_pid
-			try: 
-				punch_file = file(punch,'r')
+	for punch in punches:
+		client_pid = int(punch.split('.')[1].strip())
+		print 'client PID = %s' % client_pid
+		try: 
+			punch_file = file(punch,'r')
+		except:
+			"can't read punch file %s" % punch
+		else:
+			uid, user = punch_file.readline().split(' ')
+			print "punch in user #%s, %s" % (uid, user)
+			punch_file.close()
+			try:
+				os.kill(int(client_pid), signal.SIGUSR1)
 			except:
-				"can't read punch file %s" % punch
-			else:
-				uid, user = punch_file.readline().split(' ')
-				print "punch in user #%s, %s" % (uid, user)
-				punch_file.close()
-				try:
-					os.kill(int(client_pid), signal.SIGUSR1)
-				except:
-					print "pid %d not found" % client_pid
+				print "pid %d not found" % client_pid
 
 
 def usr2_received(signal, frame):
 	print "Signal received, ingesting time punch"
 	ingest_timepunch()
-	
+
+def clean_up_punches():
+	punches = glob.glob('/tmp/punch.*')
+	for punch in punches:
+		os.remove(punch)
+
 
 if __name__ == '__main__':
 	# TODO: don't run again if pid file exists
+	
+	# Remove stale punches 
+	clean_up_punches()
 	
 	my_pid = posix.getpid()
 	try:
