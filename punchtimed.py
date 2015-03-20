@@ -10,14 +10,31 @@ import posix
 import signal
 import time
 
+# configure: path for punch files  (default: /tmp)
+# configure: path for database
+
 def ingest_timepunch():
 	# stat the UID from the file
 	# stat other things as well (time)
-	pass
-	
-	
+	punches = glob.glob('/tmp/punch.*')
+	if not punches:
+		print "no punches found."
+	else:
+		for punch in punches:
+			print 'calling PID = %s' % punch.split('.')[1]
+			try: 
+				punch_file = file(punch,'r')
+			except:
+				"can't read punch file %s" % punch
+			else:
+				uid, user = punch_file.readline().split(' ')
+				print "punch in user #%s, %s" % (uid, user)
+				punch_file.close()
+
+
 def usr2_received(signal, frame):
-	print "Signal received"
+	print "Signal received, ingesting time punch"
+	ingest_timepunch()
 	
 
 if __name__ == '__main__':
