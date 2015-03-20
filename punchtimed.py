@@ -4,10 +4,18 @@
 # Listens for signal and punches a user in when signal received
 # Signal used: SIGUSR2
 
+import glob
+import os
 import posix
 import signal
 import time
 
+def ingest_timepunch():
+	# stat the UID from the file
+	# stat other things as well (time)
+	pass
+	
+	
 def usr2_received(signal, frame):
 	print "Signal received"
 	
@@ -30,4 +38,5 @@ if __name__ == '__main__':
 	while not done:
 		signal.pause()
 	
-	# cleanup: remove PID file
+	os.remove(pid_file)
+	
