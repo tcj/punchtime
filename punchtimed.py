@@ -10,9 +10,29 @@ import posix
 import signal
 import time
 
+try: 
+	import json
+except ImportError:
+	import simplejson as json
+
+
 # configure: path for punch files  (default: /tmp)
 # configure: path for database
 
+
+def write_to_punch_log(punch_event):
+	today = time.localtime(time.time())[0:3]
+	logname = "punchtime-%d-%d-%d.log" % today
+
+	try:
+		logfile = file('/tmp/%s' % logname,'a')
+	except:
+		print "log file inaccessible"
+		exit(1)
+	logfile.write(json.dumps(punch_event))
+	logfile.write("\n")
+	logfile.close()
+		
 def ingest_timepunch():
 	# stat the UID from the file
 	# stat other things as well (time)
@@ -25,13 +45,19 @@ def ingest_timepunch():
 		except:
 			"can't read punch file %s" % punch
 		else:
+			punchstat = os.stat(punch)
+			print "file stats: uid %d, ctime %s, localtime %s" % (punchstat.st_uid, punchstat.st_ctime, time.localtime(punchstat.st_ctime))
 			uid, user = punch_file.readline().split(' ')
-			print "punch in user #%s, %s" % (uid, user)
+			print "punch in user #%s, %s." % (uid, user)
 			punch_file.close()
+			# Signal client we've read the file
 			try:
 				os.kill(int(client_pid), signal.SIGUSR1)
 			except:
 				print "pid %d not found" % client_pid
+			
+			punch_event = (punchstat.st_uid, punchstat.st_ctime, uid, user)
+			write_to_punch_log(punch_event)
 
 
 def usr2_received(signal, frame):
