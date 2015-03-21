@@ -18,7 +18,7 @@ Time clock daemon in client/server Python fashion
   writes to "punch" file in /tmp, signals daemon to read it
 
 <h6>punch files</h6>
-  punch file contains uid, username
+  punch file contains uid, username, type of event (out or in)
 
 daemon determines actual uid and date/time from statting the punchfile
 
