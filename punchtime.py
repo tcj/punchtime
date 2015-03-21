@@ -40,6 +40,8 @@ def get_daemon_pid():
 	pidfile.close()
 	return pid	
 
+# TODO: USR1 = accepted, USR2 = denied
+
 def handle_signal(num, thread):
 	global acknowledged
 	if num == signal.SIGUSR1:
