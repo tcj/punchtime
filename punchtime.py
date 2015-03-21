@@ -6,11 +6,12 @@
 import os
 import posix
 import signal
+import sys
 import time
 
 acknowledged = False
 
-def write_flag_file(flag_file):
+def write_flag_file(flag_file, event_type):
 	uid = posix.getuid()
 	username = posix.getlogin()
 	
@@ -20,7 +21,7 @@ def write_flag_file(flag_file):
 		print "cannot open flag file, exiting"
 		exit(1)
 		
-	flagfile.write("%d %s" % (uid, username))
+	flagfile.write("%d %s %s" % (uid, username, event_type))
 	flagfile.close()
 	
 def clear_flag_file(flag_file):
@@ -47,6 +48,18 @@ def handle_signal(num, thread):
 
 	
 if __name__ == '__main__':
+	usage = """
+Usage: %s	
+	-i     punch in
+	-o     punch out
+""" % sys.argv[0]
+
+	if (len(sys.argv) < 2) or (sys.argv[1] not in ['-i','-o']) :
+		print usage
+		exit(1)
+
+	event_type = "in" if sys.argv[1]=="-i" else "out"
+
 	mypid = posix.getpid()	
 	daemon_pid = get_daemon_pid()
 	print "my pid = %d, daemon_pid = %d" % (mypid, daemon_pid)
@@ -54,7 +67,7 @@ if __name__ == '__main__':
 	signal.signal(signal.SIGUSR1, handle_signal)
 
 	flag_file = '/tmp/punch.%s' % str(mypid)	
-	write_flag_file(flag_file)
+	write_flag_file(flag_file, event_type)
 
 	# Signal daemon that our punch is ready
 	posix.kill(daemon_pid,signal.SIGUSR2)

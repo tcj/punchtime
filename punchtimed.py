@@ -46,9 +46,10 @@ def ingest_timepunch():
 			"can't read punch file %s" % punch
 		else:
 			punchstat = os.stat(punch)
-			print "file stats: uid %d, ctime %s, localtime %s" % (punchstat.st_uid, punchstat.st_ctime, time.localtime(punchstat.st_ctime))
-			uid, user = punch_file.readline().split(' ')
-			print "punch in user #%s, %s." % (uid, user)
+			print "file stats: uid %d, ctime %s, localtime %s" % \
+				(punchstat.st_uid, punchstat.st_ctime, time.localtime(punchstat.st_ctime))
+			uid, user, event_type = punch_file.readline().split(' ')
+			print "punch %s user #%s, %s." % (event_type, uid, user)
 			punch_file.close()
 			# Signal client we've read the file
 			try:
@@ -56,7 +57,7 @@ def ingest_timepunch():
 			except:
 				print "pid %d not found" % client_pid
 			
-			punch_event = (punchstat.st_uid, punchstat.st_ctime, uid, user)
+			punch_event = (punchstat.st_uid, punchstat.st_ctime, uid, user, event_type)
 			write_to_punch_log(punch_event)
 
 
