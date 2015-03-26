@@ -98,7 +98,11 @@ def ingest_timepunch():
 				# no punch out if already punched out
 				# no punch in if already punched in
 				print "Rejected!"
-			
+			else: 
+				punch_event = (punchstat.st_uid, punchstat.st_ctime, uid, user, event_type)
+				# TODO: don't write punch if rejected
+				write_to_punch_log(punch_event)
+		
 			# Signal client we've read the file
 			# TODO: SIGUSR1 = accept, SIGUSR2 = reject
 			try:
@@ -106,9 +110,6 @@ def ingest_timepunch():
 			except:
 				print "pid %d not found" % client_pid
 			
-			punch_event = (punchstat.st_uid, punchstat.st_ctime, uid, user, event_type)
-			# TODO: don't write punch if rejected
-			write_to_punch_log(punch_event)
 
 
 def usr2_received(signal, frame):
