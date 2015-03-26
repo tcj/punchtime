@@ -100,7 +100,6 @@ def ingest_timepunch():
 				print "Rejected!"
 			else: 
 				punch_event = (punchstat.st_uid, punchstat.st_ctime, uid, user, event_type)
-				# TODO: don't write punch if rejected
 				write_to_punch_log(punch_event)
 		
 			# Signal client we've read the file
