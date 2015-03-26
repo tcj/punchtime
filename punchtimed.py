@@ -19,8 +19,6 @@ except ImportError:
 # configure: path for punch files  (default: /tmp)
 # configure: path for database
 
-
-
 #    0			1		2		3		4
 # [501, 1426897992.0, "501", "user", "out"]
 
@@ -43,18 +41,21 @@ def user_punch_status(username):
 		return last_event[4]
 		
 def read_todays_events():
-	try:
-		eventlog = file(todays_log_file_name(), 'r')
-	except:
-		print "could not read log file"
-		exit(1)
-		
 	events = []
-	encoded_events = eventlog.readlines()
-	eventlog.close()
-	for encoded_event in encoded_events:
-		event = json.loads(encoded_event)
-		events += [event]
+
+	if os.path.exists(todays_log_file_name()):
+		try:
+			eventlog = file(todays_log_file_name(), 'r')
+		except:
+			print "could not read log file"
+			exit(1)
+		
+		encoded_events = eventlog.readlines()
+		eventlog.close()
+		for encoded_event in encoded_events:
+			event = json.loads(encoded_event)
+			events += [event]
+
 	return events
 	
 def todays_log_file_name():
@@ -106,6 +107,7 @@ def ingest_timepunch():
 				print "pid %d not found" % client_pid
 			
 			punch_event = (punchstat.st_uid, punchstat.st_ctime, uid, user, event_type)
+			# TODO: don't write punch if rejected
 			write_to_punch_log(punch_event)
 
 
