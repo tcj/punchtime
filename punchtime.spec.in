@@ -1,0 +1,45 @@
+%define punchtime_daemon_prefix /usr/sbin
+%define punchtime_client_prefix /usr/bin
+
+Summary: Time clock daemon in client/server Python fashion
+Name: punchtime
+Version: @@VERSION@@
+Release: 1%{?dist}
+Group: Applications/Productivity
+License: Proprietary
+
+Source0: %{name}-%{version}.tar.gz
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+
+BuildArch: noarch
+
+%description
+Punchtime is a Python-based command-line time clock system.  It is used for
+tracking and reporting the hours worked by employees.  The punchtimed daemon is
+responsible for accessing and updating punchcard data in response to signals
+from the punchtime client.
+
+%prep
+%setup
+
+%build
+
+%install
+%{__rm} -rf %{buildroot}
+%{__mkdir_p} %{buildroot}%{punchtime_daemon_prefix}
+%{__mkdir_p} %{buildroot}%{punchtime_client_prefix}
+
+%{__cp} punchtimed.py %{buildroot}%{punchtime_daemon_prefix}/punchtimed.py
+%{__cp} punchtime.py %{buildroot}%{punchtime_client_prefix}/punchtime.py
+
+%clean
+%{__rm} -rf %{buildroot}
+
+%files
+%defattr(-,root,root,0755)
+%{punchtime_daemon_prefix}/punchtimed.py
+%{punchtime_client_prefix}/punchtime.py
+
+%changelog
+* Tue Apr 28 2015 Alex Schorsch <schorsch@stanford.edu>
+- Initial package.
